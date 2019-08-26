@@ -1,6 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/mman.h>
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 struct
 {
@@ -63,6 +66,7 @@ int main(int argc, const char **argv)
     if (!upgrade_stream)
         return -1;
     fread(&pkg_file_header, 0x800u, 1u, upgrade_stream);
+    fclose(upgrade_stream);
 
     ora_buf((void *)&pkg_file_header, 2048);
 
@@ -71,6 +75,16 @@ int main(int argc, const char **argv)
     printf(" ");
     printf("\n ver = %d ", pkg_file_header.ver);
     printf("\n ");
+
+    int upgrade_fd = open(argv[1], O_RDONLY);
+    struct stat statbuff;
+    fstat(upgrade_fd, &statbuff);
+    void *upgrade_mmap = mmap(NULL, statbuff.st_size, PROT_READ, MAP_PRIVATE, upgrade_fd, 0);
+    if (upgrade_mmap == MAP_FAILED)
+    {
+        close(upgrade_fd);
+        return -1;
+    }
 
     for (int i = 0; i < 31; ++i)
     {
@@ -103,7 +117,7 @@ int main(int argc, const char **argv)
                 long devi = strtol(dev, 0, 0);
                 if (devi == 0)
                     strcpy(output_name, "u-boot-nand.bin");
-                else if (devi == 0x400000)
+                else if (devi == 0x400000 || devi == 0x500000)
                     strcpy(output_name, "uImage");
             }
             else if (!strcmp(pkg_file_header.item[i].dev, "/dev/null"))
@@ -112,16 +126,24 @@ int main(int argc, const char **argv)
             }
             else
             {
-                strcpy(output_name, strrchr(pkg_file_header.item[i].dev, '/') + 1);
+                char *dev_filename = strrchr(pkg_file_header.item[i].dev, '/');
+                if (dev_filename)
+                    sprintf(output_name, "%s.%s", dev_filename + 1, fstype);
             }
             if (output_name[0] == '\0')
                 sprintf(output_name, "idx-%d-file.bin", i);
             printf("\n file = %s ", output_name);
 
+            FILE *s = fopen(output_name, "wb");
+            fwrite(upgrade_mmap + pkg_file_header.item[i].offset, pkg_file_header.item[i].len, 1, s);
+            fclose(s);
+
             printf("\n ");
         }
     }
 
-    fclose(upgrade_stream);
+    munmap(upgrade_mmap, statbuff.st_size);
+    close(upgrade_fd);
+
     return 0;
 }
