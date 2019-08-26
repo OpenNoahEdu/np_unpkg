@@ -2,10 +2,6 @@
 #include <stdio.h>
 #include <sys/stat.h>
 
-#include "readcfg.h"
-#include "crc32.h"
-#include "checksum.h"
-
 struct
 {
     char *name;
@@ -88,7 +84,16 @@ int main(int argc, const char **argv)
             fwrite((char *)&pkg_file_header.item[i].dev, 12, 1, stdout);
             printf(" ");
             printf("\n checksum = 0x%08X ", pkg_file_header.item[i].checksum);
-            printf("\n fstype = %d ", pkg_file_header.item[i].fstype);
+            char * fstype = "unknow";
+            for (int ii = 0; pkg_fstype_tbl[ii].name; ++ii)
+            {
+                if (pkg_fstype_tbl[ii].id == pkg_file_header.item[i].fstype)
+                {
+                    fstype = pkg_fstype_tbl[ii].name;
+                    break;
+                }
+            }
+            printf("\n fstype = %s ", fstype);
             printf("\n ");
         }
     }
