@@ -128,17 +128,31 @@ int main(int argc, const char **argv)
             {
                 char *dev_filename = strrchr(pkg_file_header.item[i].dev, '/');
                 if (dev_filename)
-                    sprintf(output_name, "%s.%s", dev_filename + 1, fstype);
+                {
+                    dev_filename ++ ;
+                    if (!strcmp(dev_filename, "mtd3"))
+                        dev_filename = "rootfs";
+                    else if (!strcmp(dev_filename, "mtd4"))
+                        dev_filename = "Settings";
+                    else if (!strcmp(dev_filename, "mtd5"))
+                        dev_filename = "ProgFS";
+                    else if (!strcmp(dev_filename, "mtd6"))
+                        dev_filename = "Data";
+                    else if (!strcmp(dev_filename, "mtd7"))
+                        dev_filename = "UsrFS";
+                    else if (!strcmp(dev_filename, "mtd8"))
+                        dev_filename = "UsrDisk";
+                    sprintf(output_name, "%s.%s", dev_filename , fstype);
+                }
             }
             if (output_name[0] == '\0')
                 sprintf(output_name, "idx-%d-file.bin", i);
             printf("\n file = %s ", output_name);
+            printf("\n ");
 
             FILE *s = fopen(output_name, "wb");
             fwrite(upgrade_mmap + pkg_file_header.item[i].offset, pkg_file_header.item[i].len, 1, s);
             fclose(s);
-
-            printf("\n ");
         }
     }
 
