@@ -63,7 +63,6 @@ int main(int argc, const char **argv)
     if (!upgrade_stream)
         return -1;
     fread(&pkg_file_header, 0x800u, 1u, upgrade_stream);
-    fclose(upgrade_stream);
 
     ora_buf((void *)&pkg_file_header, 2048);
 
@@ -80,11 +79,7 @@ int main(int argc, const char **argv)
             printf("\n pkg_item_len = %d ", pkg_file_header.item[i].len);
             printf("\n offset = %d ", pkg_file_header.item[i].offset);
             printf("\n ver = %d ", pkg_file_header.item[i].ver);
-            printf("\n dev = ");
-            fwrite((char *)&pkg_file_header.item[i].dev, 12, 1, stdout);
-            printf(" ");
-            printf("\n checksum = 0x%08X ", pkg_file_header.item[i].checksum);
-            char * fstype = "unknow";
+            char *fstype = "unknow";
             for (int ii = 0; pkg_fstype_tbl[ii].name; ++ii)
             {
                 if (pkg_fstype_tbl[ii].id == pkg_file_header.item[i].fstype)
@@ -94,9 +89,39 @@ int main(int argc, const char **argv)
                 }
             }
             printf("\n fstype = %s ", fstype);
+            printf("\n checksum = 0x%08X ", pkg_file_header.item[i].checksum);
+            printf("\n dev = ");
+            fwrite(pkg_file_header.item[i].dev, 12, 1, stdout);
+            printf(" ");
+
+            char output_name[1024] = {0};
+            if (pkg_file_header.item[i].dev[0] >= '0' && pkg_file_header.item[i].dev[0] <= '9')
+            {
+                char dev[13];
+                memcpy(dev, pkg_file_header.item[i].dev, 12);
+                dev[12] = '\0';
+                long devi = strtol(dev, 0, 0);
+                if (devi == 0)
+                    strcpy(output_name, "u-boot-nand.bin");
+                else if (devi == 0x400000)
+                    strcpy(output_name, "uImage");
+            }
+            else if (!strcmp(pkg_file_header.item[i].dev, "/dev/null"))
+            {
+                strcpy(output_name, "uImage-initrd");
+            }
+            else
+            {
+                strcpy(output_name, strrchr(pkg_file_header.item[i].dev, '/') + 1);
+            }
+            if (output_name[0] == '\0')
+                sprintf(output_name, "idx-%d-file.bin", i);
+            printf("\n file = %s ", output_name);
+
             printf("\n ");
         }
     }
 
+    fclose(upgrade_stream);
     return 0;
 }
