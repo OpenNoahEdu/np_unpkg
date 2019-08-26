@@ -5,5 +5,5 @@
 u-boot-nand.bin
 uImage
 uImage-initrd
-mtd*
-ubi*
+*.yaffs2
+*.ubifs
