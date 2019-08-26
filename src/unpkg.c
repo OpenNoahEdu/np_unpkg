@@ -142,6 +142,16 @@ int main(int argc, const char **argv)
                         dev_filename = "UsrFS";
                     else if (!strcmp(dev_filename, "mtd8"))
                         dev_filename = "UsrDisk";
+                    else if (!strcmp(dev_filename, "ubi0_0"))
+                        dev_filename = "rootfs";
+                    else if (!strcmp(dev_filename, "ubi0_1"))
+                        dev_filename = "Settings";
+                    else if (!strcmp(dev_filename, "ubi0_2"))
+                        dev_filename = "ProgFS";
+                    else if (!strcmp(dev_filename, "ubi0_3"))
+                        dev_filename = "Data";
+                    else if (!strcmp(dev_filename, "ubi0_6"))
+                        dev_filename = "UsrDisk";
                     sprintf(output_name, "%s.%s", dev_filename , fstype);
                 }
             }
