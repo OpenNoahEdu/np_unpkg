@@ -138,7 +138,7 @@ int main(int argc, const char **argv)
                     else if (!strcmp(dev_filename, "mtd5"))
                         dev_filename = "ProgFS";
                     else if (!strcmp(dev_filename, "mtd6"))
-                        dev_filename = "Data";
+                        dev_filename = "DataFS";
                     else if (!strcmp(dev_filename, "mtd7"))
                         dev_filename = "UsrFS";
                     else if (!strcmp(dev_filename, "mtd8"))
@@ -150,7 +150,7 @@ int main(int argc, const char **argv)
                     else if (!strcmp(dev_filename, "ubi0_2"))
                         dev_filename = "ProgFS";
                     else if (!strcmp(dev_filename, "ubi0_3"))
-                        dev_filename = "Data";
+                        dev_filename = "DataFS";
                     else if (!strcmp(dev_filename, "ubi0_6"))
                         dev_filename = "UsrDisk";
                     sprintf(output_name, "%s.%s", dev_filename , fstype);
